@@ -1,6 +1,5 @@
 	.file	"asm-offsets.c"
 	.option nopic
-	.option norelax
 # GNU C17 (Buildroot 2020.08-14-ge5a2a90) version 10.2.0 (riscv64-buildroot-linux-musl)
 #	compiled by GNU C version 4.9.2, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version none
 # warning: MPFR header version 4.0.2 differs from library version 4.0.1.
@@ -24,7 +23,7 @@
 # -include include/generated/autoconf.h
 # -include /code/oskernel2025-xiyou-lug-hub/kernel-travel/include/xkernel/kconfig.h
 # -MMD arch/riscv/kernel/.asm-offsets.s.d arch/riscv/kernel/asm-offsets.c
-# -mabi=lp64 -mno-relax -march=rv64imac -mno-save-restore -mcmodel=medany
+# -mabi=lp64 -march=rv64imac -mno-save-restore -mcmodel=medany
 # -mno-riscv-attribute -mstrict-align
 # -auxbase-strip arch/riscv/kernel/asm-offsets.s -g -O0 -Wall -Wundef
 # -Wstrict-prototypes -Wno-trigraphs -Wno-format-security
@@ -62,12 +61,12 @@
 .Ldebug_line0:
 	.section	.debug_str,"MS",@progbits,1
 .LASF0:
-	.ascii	"GNU C17 10.2.0 -mabi=lp64 -mno-relax -march=rv64imac -mno-sa"
-	.ascii	"ve-restore -mcmodel=medany -mn"
-	.string	"o-riscv-attribute -mstrict-align -g -O0 -fno-strict-aliasing -fno-common -fno-delete-null-pointer-checks -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-stack-protector -fomit-frame-pointer -fno-strict-overflow -fconserve-stack -fno-tree-scev-cprop"
-.LASF1:
 	.string	"/code/oskernel2025-xiyou-lug-hub/kernel-travel"
-.LASF2:
+.LASF1:
 	.string	"arch/riscv/kernel/asm-offsets.c"
+.LASF2:
+	.ascii	"GNU C17 10.2.0 -mabi=lp64 -march=rv64imac -mno-save-restore "
+	.ascii	"-mcmodel=medany -mn"
+	.string	"o-riscv-attribute -mstrict-align -g -O0 -fno-strict-aliasing -fno-common -fno-delete-null-pointer-checks -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-stack-protector -fomit-frame-pointer -fno-strict-overflow -fconserve-stack -fno-tree-scev-cprop"
 	.ident	"GCC: (Buildroot 2020.08-14-ge5a2a90) 10.2.0"
 	.section	.note.GNU-stack,"",@progbits
