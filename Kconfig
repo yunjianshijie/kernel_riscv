@@ -204,7 +204,7 @@ config GCC_SUPPORTS_DYNAMIC_FTRACE
 	def_bool CC_IS_GCC
 	# depends on $(cc-option,-fpatchable-function-entry=8)
 
-config HAVE_SHADOW_CALL_STACK
+# config HAVE_SHADOW_CALL_STACK
 	# def_bool $(cc-option,-fsanitize=shadow-call-stack)
 	# https://github.com/riscv-non-isa/riscv-elf-psabi-doc/commit/a484e843e6eeb51f0cb7b8819e50da6d2444d769
 	# depends on $(ld-option,--no-relax-gp)
@@ -223,21 +223,21 @@ config ARCH_HAS_BROKEN_DWARF5
 	# https://github.com/llvm/llvm-project/commit/7ffabb61a5569444b5ac9322e22e5471cc5e4a77
 	# depends on LD_IS_LLD && LLD_VERSION < 180000
 
-config ARCH_MMAP_RND_BITS_MIN
-	default 18 if 64BIT
-	default 8
+# config ARCH_MMAP_RND_BITS_MIN
+ 	# default 18 if 64BIT
+ 	# default 8
 
-config ARCH_MMAP_RND_COMPAT_BITS_MIN
-	default 8
+# config ARCH_MMAP_RND_COMPAT_BITS_MIN
+	# default 8
 
 # max bits determined by the following formula:
 #  VA_BITS - PAGE_SHIFT - 3
-config ARCH_MMAP_RND_BITS_MAX
-	default 24 if 64BIT # SV39 based
-	default 17
+# config ARCH_MMAP_RND_BITS_MAX
+	# default 24 if 64BIT # SV39 based
+	# default 17
 
-config ARCH_MMAP_RND_COMPAT_BITS_MAX
-	default 17
+# config ARCH_MMAP_RND_COMPAT_BITS_MAX
+	# default 17
 
 # set if we run in machine mode, cleared if we run in supervisor mode
 config RISCV_M_MODE
@@ -334,7 +334,7 @@ config RISCV_NONSTANDARD_CACHE_OPS
 	  This enables function pointer support for non-standard noncoherent
 	  systems to handle cache management.
 
-config AS_HAS_INSN
+# config AS_HAS_INSN
 	# def_bool $(as-instr,.insn r 51$(comma) 0$(comma) 0$(comma) t0$(comma) t0$(comma) zero)
 
 config AS_HAS_OPTION_ARCH
@@ -606,9 +606,9 @@ config TOOLCHAIN_HAS_ZBB
 # This symbol indicates that the toolchain supports all v1.0 vector crypto
 # extensions, including Zvk*, Zvbb, and Zvbc.  LLVM added all of these at once.
 # binutils added all except Zvkb, then added Zvkb.  So we just check for Zvkb.
-config TOOLCHAIN_HAS_VECTOR_CRYPTO
+# config TOOLCHAIN_HAS_VECTOR_CRYPTO
 	# def_bool $(as-instr, .option arch$(comma) +v$(comma) +zvkb)
-	depends on AS_HAS_OPTION_ARCH
+	# depends on AS_HAS_OPTION_ARCH
 
 config RISCV_ISA_ZBB
 	bool "Zbb extension support for bit manipulation instructions"
@@ -967,7 +967,7 @@ config EFI
 	  allow the kernel to be booted as an EFI application. This
 	  is only useful on systems that have UEFI firmware.
 
-config CC_HAVE_STACKPROTECTOR_TLS
+# config CC_HAVE_STACKPROTECTOR_TLS
 	# def_bool $(cc-option,-mstack-protector-guard=tls -mstack-protector-guard-reg=tp -mstack-protector-guard-offset=0)
 
 config STACKPROTECTOR_PER_TASK
