@@ -16,6 +16,7 @@ config RISCV
 	select ACPI_REDUCED_HARDWARE_ONLY if ACPI
 	select ARCH_DMA_DEFAULT_COHERENT
 	select ARCH_ENABLE_HUGEPAGE_MIGRATION if HUGETLB_PAGE && MIGRATION
+	# select ARCH_ENABLE_SPLIT_PMD_PTLOCK if PGTABLE_LEVELS > 2
 	select ARCH_ENABLE_THP_MIGRATION if TRANSPARENT_HUGEPAGE
 	select ARCH_HAS_BINFMT_FLAT
 	select ARCH_HAS_CURRENT_STACK_POINTER
@@ -52,6 +53,7 @@ config RISCV
 	select ARCH_SUPPORTS_CFI_CLANG
 	select ARCH_SUPPORTS_DEBUG_PAGEALLOC if MMU
 	select ARCH_SUPPORTS_HUGETLBFS if MMU
+	# LLD >= 14: https://github.com/llvm/llvm-project/issues/50505
 	select ARCH_SUPPORTS_LTO_CLANG if LLD_VERSION >= 140000
 	select ARCH_SUPPORTS_LTO_CLANG_THIN if LLD_VERSION >= 140000
 	select ARCH_SUPPORTS_PAGE_TABLE_CHECK if MMU
@@ -200,11 +202,42 @@ config CLANG_SUPPORTS_DYNAMIC_FTRACE
 
 config GCC_SUPPORTS_DYNAMIC_FTRACE
 	def_bool CC_IS_GCC
+	# depends on $(cc-option,-fpatchable-function-entry=8)
+
+# config HAVE_SHADOW_CALL_STACK
+	# def_bool $(cc-option,-fsanitize=shadow-call-stack)
+	# https://github.com/riscv-non-isa/riscv-elf-psabi-doc/commit/a484e843e6eeb51f0cb7b8819e50da6d2444d769
+	# depends on $(ld-option,--no-relax-gp)
+
+config RISCV_USE_LINKER_RELAXATION
+	def_bool y
+	# https://github.com/llvm/llvm-project/commit/6611d58f5bbcbec77262d392e2923e1d680f6985
+	depends on !LD_IS_LLD || LLD_VERSION >= 150000
 
 # https://github.com/llvm/llvm-project/commit/bbc0f99f3bc96f1db16f649fc21dd18e5b0918f6
 config ARCH_HAS_BROKEN_DWARF5
 	def_bool y
 	depends on RISCV_USE_LINKER_RELAXATION
+	# https://github.com/llvm/llvm-project/commit/1df5ea29b43690b6622db2cad7b745607ca4de6a
+	# depends on AS_IS_LLVM && AS_VERSION < 180000
+	# https://github.com/llvm/llvm-project/commit/7ffabb61a5569444b5ac9322e22e5471cc5e4a77
+	# depends on LD_IS_LLD && LLD_VERSION < 180000
+
+# config ARCH_MMAP_RND_BITS_MIN
+ 	# default 18 if 64BIT
+ 	# default 8
+
+# config ARCH_MMAP_RND_COMPAT_BITS_MIN
+	# default 8
+
+# max bits determined by the following formula:
+#  VA_BITS - PAGE_SHIFT - 3
+# config ARCH_MMAP_RND_BITS_MAX
+	# default 24 if 64BIT # SV39 based
+	# default 17
+
+# config ARCH_MMAP_RND_COMPAT_BITS_MAX
+	# default 17
 
 # set if we run in machine mode, cleared if we run in supervisor mode
 config RISCV_M_MODE
@@ -300,6 +333,14 @@ config RISCV_NONSTANDARD_CACHE_OPS
 	help
 	  This enables function pointer support for non-standard noncoherent
 	  systems to handle cache management.
+
+# config AS_HAS_INSN
+	# def_bool $(as-instr,.insn r 51$(comma) 0$(comma) 0$(comma) t0$(comma) t0$(comma) zero)
+
+config AS_HAS_OPTION_ARCH
+	# https://github.com/llvm/llvm-project/commit/9e8ed3403c191ab9c4903e8eeb8f732ff8a43cb4
+	def_bool y
+	# depends on $(as-instr, .option arch$(comma) +m)
 
 source "arch/riscv/Kconfig.socs"
 source "arch/riscv/Kconfig.errata"
@@ -504,6 +545,8 @@ config RISCV_ISA_SVPBMT
 config TOOLCHAIN_HAS_V
 	bool
 	default y
+	# depends on !64BIT || $(cc-option,-mabi=lp64 -march=rv64iv)
+	# depends on !32BIT || $(cc-option,-mabi=ilp32 -march=rv32iv)
 	depends on LLD_VERSION >= 140000 || LD_VERSION >= 23800
 	depends on AS_HAS_OPTION_ARCH
 
@@ -555,12 +598,17 @@ config RISCV_ISA_V_PREEMPTIVE
 config TOOLCHAIN_HAS_ZBB
 	bool
 	default y
+	# depends on !64BIT || $(cc-option,-mabi=lp64 -march=rv64ima_zbb)
+	# depends on !32BIT || $(cc-option,-mabi=ilp32 -march=rv32ima_zbb)
 	depends on LLD_VERSION >= 150000 || LD_VERSION >= 23900
 	depends on AS_HAS_OPTION_ARCH
 
 # This symbol indicates that the toolchain supports all v1.0 vector crypto
 # extensions, including Zvk*, Zvbb, and Zvbc.  LLVM added all of these at once.
 # binutils added all except Zvkb, then added Zvkb.  So we just check for Zvkb.
+# config TOOLCHAIN_HAS_VECTOR_CRYPTO
+	# def_bool $(as-instr, .option arch$(comma) +v$(comma) +zvkb)
+	# depends on AS_HAS_OPTION_ARCH
 
 config RISCV_ISA_ZBB
 	bool "Zbb extension support for bit manipulation instructions"
@@ -609,6 +657,8 @@ config RISCV_ISA_ZICBOZ
 config TOOLCHAIN_HAS_ZIHINTPAUSE
 	bool
 	default y
+	# depends on !64BIT || $(cc-option,-mabi=lp64 -march=rv64ima_zihintpause)
+	# depends on !32BIT || $(cc-option,-mabi=ilp32 -march=rv32ima_zihintpause)
 	depends on LLD_VERSION >= 150000 || LD_VERSION >= 23600
 
 config TOOLCHAIN_NEEDS_EXPLICIT_ZICSR_ZIFENCEI
@@ -632,6 +682,7 @@ config TOOLCHAIN_NEEDS_OLD_ISA_SPEC
 	depends on TOOLCHAIN_NEEDS_EXPLICIT_ZICSR_ZIFENCEI
 	# https://github.com/llvm/llvm-project/commit/22e199e6afb1263c943c0c0d4498694e15bf8a16
 	# https://gcc.gnu.org/git/?p=gcc.git;a=commit;h=d29f5d6ab513c52fd872f532c492e35ae9fd6671
+	# depends on (CC_IS_CLANG && CLANG_VERSION < 170000) || (CC_IS_GCC && GCC_VERSION < 110300)
 	help
 	  Certain versions of clang and GCC do not support zicsr and zifencei via
 	  -march. This option causes an older ISA spec compatible with these older
@@ -915,6 +966,9 @@ config EFI
 	  clock, and platform reset). A UEFI stub is also provided to
 	  allow the kernel to be booted as an EFI application. This
 	  is only useful on systems that have UEFI firmware.
+
+# config CC_HAVE_STACKPROTECTOR_TLS
+	# def_bool $(cc-option,-mstack-protector-guard=tls -mstack-protector-guard-reg=tp -mstack-protector-guard-offset=0)
 
 config STACKPROTECTOR_PER_TASK
 	def_bool y
