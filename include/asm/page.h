@@ -11,6 +11,11 @@
 
 #include <xkernel/pfn.h>
 #include <xkernel/const.h>
+typedef unsigned long uintptr_t;
+
+#ifndef CONFIG_PAGE_SHIFT
+#define CONFIG_PAGE_SHIFT 12 // 假设默认页面大小为 4KB，4KB = 2^12
+#endif
 
 #define PAGE_SHIFT	CONFIG_PAGE_SHIFT
 #define PAGE_SIZE	(_AC(1, UL) << PAGE_SHIFT)
