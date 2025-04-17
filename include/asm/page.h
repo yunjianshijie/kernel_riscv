@@ -13,18 +13,9 @@
 #include <xkernel/const.h>
 typedef unsigned long uintptr_t;
 
-#ifndef CONFIG_PAGE_SHIFT
-#define CONFIG_PAGE_SHIFT 12 // 假设默认页面大小为 4KB，4KB = 2^12
-#endif
-
-#define PAGE_SHIFT	CONFIG_PAGE_SHIFT
+#define PAGE_SHIFT	12
 #define PAGE_SIZE	(_AC(1, UL) << PAGE_SHIFT)
 #define PAGE_MASK	(~(PAGE_SIZE - 1))
-
-#define HPAGE_SHIFT		PMD_SHIFT
-#define HPAGE_SIZE		(_AC(1, UL) << HPAGE_SHIFT)
-#define HPAGE_MASK              (~(HPAGE_SIZE - 1))
-#define HUGETLB_PAGE_ORDER      (HPAGE_SHIFT - PAGE_SHIFT)
 
 /*
  * PAGE_OFFSET -- the first address of the first page of memory.
